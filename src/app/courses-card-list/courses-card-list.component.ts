@@ -10,29 +10,25 @@ import {CourseDialogComponent} from "../course-dialog/course-dialog.component";
 })
 export class CoursesCardListComponent implements OnInit {
 
-    @Input()
-    courses: Course[];
+  @Input()
+  courses: Course[];
 
-    constructor(private dialog: MatDialog) {
-    }
+  constructor(private dialog: MatDialog) {}
 
-    ngOnInit() {
+  ngOnInit() {}
 
-    }
+  editCourse(course:Course) {
 
-    editCourse(course:Course) {
+    const dialogConfig = new MatDialogConfig();
 
-        const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
 
-        dialogConfig.disableClose = true;
-        dialogConfig.autoFocus = true;
+    dialogConfig.data = course;
 
-        dialogConfig.data = course;
+    const dialogRef = this.dialog.open(CourseDialogComponent, dialogConfig);
 
-        const dialogRef = this.dialog.open(CourseDialogComponent, dialogConfig);
-
-
-    }
+  }
 
 }
 

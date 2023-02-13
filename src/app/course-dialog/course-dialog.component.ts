@@ -14,46 +14,60 @@ import {fromPromise} from 'rxjs/internal-compatibility';
 })
 export class CourseDialogComponent implements OnInit, AfterViewInit {
 
-    form: FormGroup;
-    course:Course;
+  form: FormGroup;
+  course:Course;
 
-    @ViewChild('saveButton', { static: true }) saveButton: ElementRef;
+  @ViewChild('saveButton', { static: true, read: ElementRef }) saveButton: ElementRef;
 
-    @ViewChild('searchInput', { static: true }) searchInput : ElementRef;
+  @ViewChild('searchInput', { static: true }) searchInput : ElementRef;
 
-    constructor(
-        private fb: FormBuilder,
-        private dialogRef: MatDialogRef<CourseDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) course:Course ) {
+  constructor(
+    private fb: FormBuilder,
+    private dialogRef: MatDialogRef<CourseDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) course:Course ) {
 
-        this.course = course;
+    this.course = course;
 
-        this.form = fb.group({
-            description: [course.description, Validators.required],
-            category: [course.category, Validators.required],
-            releasedAt: [moment(), Validators.required],
-            longDescription: [course.longDescription,Validators.required]
-        });
+    this.form = fb.group({
+      description: [course.description, Validators.required],
+      category: [course.category, Validators.required],
+      releasedAt: [moment(), Validators.required],
+      longDescription: [course.longDescription,Validators.required]
+    });
+  }
 
-    }
+  ngOnInit() {
+    this.form.valueChanges.pipe(
+      filter(() => this.form.valid),
+      concatMap(changes => this.saveCourse(changes))
+    ).subscribe();
+  }
 
-    ngOnInit() {
+  ngAfterViewInit() {
+    // console.log(this.saveButton);
+    // console.log(this.searchInput);
 
+    fromEvent(this.saveButton.nativeElement, 'click').pipe(
+      exhaustMap(() => this.saveCourse(this.form.value))
+    ).subscribe();
 
+    // buttonStream$.subscribe(event => console.log(event));
+  }
 
-    }
+  saveCourse(changes) {
+    return fromPromise(
+      fetch('/api/courses/' + this.course.id, {
+        method: 'PUT',
+        body: JSON.stringify(changes),
+        headers: {
+          'content-type': 'application/json'
+        }
+      })
+    )
+  }
 
-
-
-    ngAfterViewInit() {
-
-
-    }
-
-
-
-    close() {
-        this.dialogRef.close();
-    }
+  close() {
+      this.dialogRef.close();
+  }
 
 }
